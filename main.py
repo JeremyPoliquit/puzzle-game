@@ -16,27 +16,29 @@ navigation_text.place(x=0, y=20)
 score_board = tk.Frame(root)
 score_board.place(x=0, y=40)
 
-# Load all images from the folder and resize
+# Load all images from the folder and resize, and save with fruit names
 IMAGE_FOLDER = "images/fruits"
 image_files = [f for f in os.listdir(IMAGE_FOLDER) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
 
-loaded_images = []
-for img_file in image_files:
-    img_path = os.path.join(IMAGE_FOLDER, img_file)
+images_with_names = []
+for filename in image_files:
+    img_path = os.path.join(IMAGE_FOLDER, filename)
     img = Image.open(img_path).resize((100, 100))  # resize all images to 100x100
-    loaded_images.append(ImageTk.PhotoImage(img))
+    photo_img = ImageTk.PhotoImage(img)
+    fruit_name = os.path.splitext(filename)[0].lower()  # get fruit name from filename
+    images_with_names.append((photo_img, fruit_name))
 
-# If less than 16 images, images will repeat randomly
-if len(loaded_images) == 0:
+if len(images_with_names) == 0:
     raise Exception("No images found in the images folder!")
-
-# Event function
-def on_click(event):
-    selected_fruit.config(text="Pineapple")
-    print("Clicked")
 
 counter = 0
 score_count = 0
+
+def on_click(event):
+    clicked_btn = event.widget
+    fruit = getattr(clicked_btn, 'fruit_name', 'Unknown')
+    selected_fruit.config(text=fruit.capitalize())
+    print(f"Clicked fruit: {fruit}")
 
 def attempt_function(event):
     global counter
@@ -67,11 +69,11 @@ button_images = []
 
 for row in range(4):
     for col in range(4):
-        # Pick a random image from loaded_images
-        img = random.choice(loaded_images)
+        img, fruit = random.choice(images_with_names)
         button_images.append(img)  # keep reference
         
         btn = tk.Button(grid_frame, image=img)
+        btn.fruit_name = fruit  # store fruit name on the button
         btn.grid(row=row, column=col, padx=5, pady=5)
         btn.bind("<Button-1>", combined_function)
 
