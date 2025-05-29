@@ -2,6 +2,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import os
 import random
+import tkinter.messagebox as messagebox
 
 root = tk.Tk()
 root.geometry("600x600")
@@ -33,11 +34,36 @@ if len(images_with_names) == 0:
 
 counter = 0
 score_count = 0
+selected_fruit_name = None  # This will store the first fruit selected
+
+def reset_game():
+    global selected_fruit_name, counter, score_count
+    selected_fruit_name = None
+    counter = 0
+    score_count = 0
+    attempt.config(text=f"Attempt: {counter}")
+    scores.config(text=f"Scores: {score_count}")
+    selected_fruit.config(text="None")
 
 def on_click(event):
+    global selected_fruit_name
     clicked_btn = event.widget
     fruit = getattr(clicked_btn, 'fruit_name', 'Unknown')
-    selected_fruit.config(text=fruit.capitalize())
+    
+    if selected_fruit_name is None:
+        # First fruit selected
+        selected_fruit_name = fruit
+        selected_fruit.config(text=fruit.capitalize())
+    else:
+        # Check if same fruit selected
+        if fruit != selected_fruit_name:
+            messagebox.showerror("Game Over", f"You already selected {selected_fruit_name.capitalize()}. Selecting {fruit.capitalize()} is not allowed!")
+            reset_game()
+            return
+        else:
+            # Same fruit selected, just update label or keep it
+            selected_fruit.config(text=fruit.capitalize())
+
     print(f"Clicked fruit: {fruit}")
 
 def attempt_function(event):
